@@ -37,17 +37,40 @@ export const visionAgent = async (state: typeof AgentState.State) => {
     }
 
     const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-image:generateContent?key=${apiKey}`;
-    const response = await axios.post(url, {
-      contents: [
-        {
-          parts: [
+    
+    let response;
+    let retries = 3;
+    let delay = 2000;
+    
+    while (retries > 0) {
+      try {
+        response = await axios.post(url, {
+          contents: [
             {
-              text: `Generate an image based on this description: ${enhancedPrompt}`,
+              parts: [
+                {
+                  text: `Generate an image based on this description: ${enhancedPrompt}`,
+                },
+              ],
             },
           ],
-        },
-      ],
-    });
+        });
+        break; // Success
+      } catch (err: any) {
+        if (err.response?.status === 429 && retries > 1) {
+          console.warn(`Gemini rate limited (429). Retrying in ${delay}ms...`);
+          await new Promise((res) => setTimeout(res, delay));
+          retries--;
+          delay *= 2; // Exponential backoff
+        } else {
+          throw err;
+        }
+      }
+    }
+
+    if (!response) {
+      throw new Error("Failed to receive response from Gemini image generation model.");
+    }
 
     const part = response.data.candidates?.[0]?.content?.parts?.[0];
     if (!part?.inlineData?.data) {
