@@ -2,6 +2,7 @@ import { getModel } from "../config/llmmodel.ts";
 import { AgentState } from "./state.ts";
 
 export const router = async (state: typeof AgentState.State) => {
+  // If the user selected a specific specialized tool agent (not auto or chat), route directly
   if (state.agent && state.agent !== "auto" && state.agent !== "chat") {
     return { agent: state.agent };
   }
@@ -25,13 +26,6 @@ export const router = async (state: typeof AgentState.State) => {
   console.log({ routerResponse: response });
 
   const content = typeof response.content === "string" ? response.content.trim().toLowerCase() : "";
-  
-  if (state.agent === "chat") {
-    if (content === "search") {
-      return { agent: "search" };
-    }
-    return { agent: "chat" };
-  }
 
   return { agent: content || "chat" };
 };
