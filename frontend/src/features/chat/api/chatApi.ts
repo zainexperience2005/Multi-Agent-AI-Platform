@@ -26,6 +26,7 @@ export interface Message {
   content: string;
   images?: string[];
   artifacts?: Artifact[];
+  agent?: string;
   createdAt?: string;
   updatedAt?: string;
 }

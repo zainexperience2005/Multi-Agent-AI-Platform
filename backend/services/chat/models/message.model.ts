@@ -49,6 +49,9 @@ const messageSchema = new mongoose.Schema(
     artifacts: {
       type: [artifactSchema],
     },
+    agent: {
+      type: String,
+    },
   },
   { timestamps: true },
 );

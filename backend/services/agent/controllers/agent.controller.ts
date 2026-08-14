@@ -28,6 +28,7 @@ export const agent = async (req: Request, res: Response): Promise<Response> => {
         content: result.aiResponse,
         images: result.images,
         artifacts: result.artifacts,
+        agent: result.agent,
       });
     }
 

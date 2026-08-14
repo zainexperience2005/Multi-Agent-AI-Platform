@@ -171,7 +171,8 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ conversationId, conversation
         role: "assistant",
         content: response.answer,
         images: response.images,
-        artifacts: response.artifacts
+        artifacts: response.artifacts,
+        agent: response.agent
       }
       setMessages((prev) => [...prev, tempAgentMsg])
     } else {
@@ -376,6 +377,28 @@ const MessageItem: React.FC<{ message: Message }> = ({ message }) => {
           <span className="text-xs font-semibold text-slate-300">
             {isUser ? "You" : "Nexus Assistant"}
           </span>
+          {!isUser && message.agent && (
+            <Badge
+              variant="outline"
+              className={`text-[9px] px-1.5 py-0 border font-semibold tracking-wide capitalize ${
+                message.agent === "coding"
+                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                  : message.agent === "search"
+                  ? "bg-indigo-500/10 text-indigo-400 border-indigo-500/30"
+                  : message.agent === "pdf"
+                  ? "bg-cyan-500/10 text-cyan-400 border-cyan-500/30"
+                  : message.agent === "ppt"
+                  ? "bg-rose-500/10 text-rose-400 border-rose-500/30"
+                  : message.agent === "pdfRag"
+                  ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
+                  : message.agent === "vision"
+                  ? "bg-purple-500/10 text-purple-400 border-purple-500/30"
+                  : "bg-blue-500/10 text-blue-400 border-blue-500/30"
+              }`}
+            >
+              {message.agent} Agent
+            </Badge>
+          )}
           {message.createdAt && (
             <span className="text-[10px] text-slate-500">
               {new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}

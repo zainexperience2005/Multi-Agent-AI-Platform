@@ -70,7 +70,7 @@ export const saveMessage = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { conversationId, role, content, images, artifacts } = req.body;
+  const { conversationId, role, content, images, artifacts, agent } = req.body;
   try {
     const message = await Message.create({
       conversationId,
@@ -78,6 +78,7 @@ export const saveMessage = async (
       content,
       images,
       artifacts,
+      agent,
     });
 
     // If the message is from the user, check if we need to update the conversation title
