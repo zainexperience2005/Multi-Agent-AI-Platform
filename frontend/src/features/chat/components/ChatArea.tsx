@@ -545,6 +545,15 @@ const MessageItem: React.FC<{
         )}
       </div>
 
+      {isUser && (
+        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600/10 border border-indigo-500/25">
+          <UserIcon className="h-4.5 w-4.5 text-indigo-400" />
+        </div>
+      )}
+    </div>
+  )
+}
+
 // Simple regex extractor for download URLs (S3 buckets / static routes)
 function extractDownloadLinks(content: string): { url: string; ext: string }[] {
   const urlRegex = /(https?:\/\/[^\s]+)/g
