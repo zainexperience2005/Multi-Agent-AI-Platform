@@ -55,3 +55,22 @@ export const logout = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+export const getMe = async (req: Request, res: Response) => {
+  try {
+    const { session } = req.cookies;
+    if (!session) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const userStr = await redisClient.get(`session:${session}`);
+    if (!userStr) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const user = JSON.parse(userStr);
+    return res.status(200).json({ user });
+  } catch (error) {
+    console.error("GetMe error:", error);
+    return res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+

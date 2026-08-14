@@ -4,6 +4,9 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import dotenv from "dotenv";
 import proxy from "express-http-proxy";
+import proxyWithHeader from "./utils/proxy-with-header.ts";
+import protect from "./middleware/auth.middleware.ts";
+import getCurrentUser from "./controllers/user.controller.ts";
 
 // Load environment variables
 dotenv.config();
@@ -22,7 +25,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
+app.get("/api/me", protect, getCurrentUser);
 app.use(
   "/api/auth",
   proxy(`${process.env.AUTH_PORT}`, {
