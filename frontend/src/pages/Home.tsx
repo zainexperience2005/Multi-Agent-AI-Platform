@@ -13,6 +13,7 @@ import { auth } from "@/utils/firebase"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { ChatSidebar } from "@/features/chat/components/ChatSidebar"
 import { ChatArea } from "@/features/chat/components/ChatArea"
+import { ArtifactPanel, type ArtifactData } from "@/features/chat/components/ArtifactPanel"
 import { getConversations, createConversation, deleteConversation, type Conversation } from "@/features/chat/api/chatApi"
 import { MessageSquare, Loader2 } from "lucide-react"
 
@@ -21,6 +22,11 @@ export const Home: React.FC = () => {
   const conversations = useSelector((state: RootState) => state.conversation.conversations)
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
+  const [activeArtifact, setActiveArtifact] = useState<ArtifactData | null>(null)
+
+  useEffect(() => {
+    setActiveArtifact(null)
+  }, [activeConversationId])
 
   useEffect(() => {
     const fetchConversations = async () => {
@@ -112,10 +118,19 @@ export const Home: React.FC = () => {
           
           {/* Main workspace area */}
           {activeConversationId ? (
-            <ChatArea
-              conversationId={activeConversationId}
-              conversationTitle={activeChat?.title || "New Chat"}
-            />
+            <div className="flex-1 flex min-w-0 overflow-hidden relative">
+              <ChatArea
+                conversationId={activeConversationId}
+                conversationTitle={activeChat?.title || "New Chat"}
+                onOpenArtifact={setActiveArtifact}
+              />
+              {activeArtifact && (
+                <ArtifactPanel
+                  artifact={activeArtifact}
+                  onClose={() => setActiveArtifact(null)}
+                />
+              )}
+            </div>
           ) : (
             <div className="flex-1 flex items-center justify-center p-8 text-center max-w-2xl mx-auto w-full">
               <div className="space-y-6 animate-fade-in">

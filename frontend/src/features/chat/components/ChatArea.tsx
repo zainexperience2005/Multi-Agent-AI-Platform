@@ -24,9 +24,12 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
 
+import { type ArtifactData } from "./ArtifactPanel"
+
 interface ChatAreaProps {
   conversationId: string
   conversationTitle: string
+  onOpenArtifact: (artifact: ArtifactData | null) => void
 }
 
 interface AgentOption {
@@ -89,7 +92,7 @@ const AGENTS: AgentOption[] = [
   }
 ]
 
-export const ChatArea: React.FC<ChatAreaProps> = ({ conversationId, conversationTitle }) => {
+export const ChatArea: React.FC<ChatAreaProps> = ({ conversationId, conversationTitle, onOpenArtifact }) => {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [selectedAgent, setSelectedAgent] = useState<string>("chat")
@@ -254,7 +257,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ conversationId, conversation
         ) : (
           <div className="space-y-6">
             {messages.map((msg, i) => (
-              <MessageItem key={i} message={msg} />
+              <MessageItem key={i} message={msg} onOpenArtifact={onOpenArtifact} />
             ))}
           </div>
         )}
@@ -360,7 +363,10 @@ export const ChatArea: React.FC<ChatAreaProps> = ({ conversationId, conversation
 }
 
 // Nested Message Item Component to render user vs assistant roles
-const MessageItem: React.FC<{ message: Message }> = ({ message }) => {
+const MessageItem: React.FC<{
+  message: Message
+  onOpenArtifact: (artifact: ArtifactData | null) => void
+}> = ({ message, onOpenArtifact }) => {
   const isUser = message.role === "user"
 
   return (
@@ -464,16 +470,30 @@ const MessageItem: React.FC<{ message: Message }> = ({ message }) => {
           {!isUser && message.content && message.content.includes("http") && (
             <div className="mt-3 flex flex-wrap gap-2">
               {extractDownloadLinks(message.content).map((link, idx) => (
-                <a
-                  key={idx}
-                  href={link.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-1.5 px-3 rounded-lg shadow-sm active:scale-95 transition-all"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  Download Generated {link.ext.toUpperCase()}
-                </a>
+                <div key={idx} className="flex flex-wrap gap-2 items-center">
+                  <a
+                    href={link.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-xs py-1.5 px-3 rounded-lg shadow-sm active:scale-95 transition-all"
+                  >
+                    <Download className="h-3.5 w-3.5" />
+                    Download {link.ext.toUpperCase()}
+                  </a>
+                  <button
+                    onClick={() => onOpenArtifact({
+                      id: link.url,
+                      type: "File",
+                      title: link.ext.toUpperCase() === "PDF" ? "PDF Document Report" : "PowerPoint Slides",
+                      url: link.url,
+                      extension: link.ext as any
+                    })}
+                    className="inline-flex items-center gap-1.5 bg-slate-950 border border-slate-800 hover:border-slate-700 hover:bg-slate-900 text-indigo-400 font-semibold text-xs py-1.5 px-3 rounded-lg shadow-sm active:scale-95 transition-all cursor-pointer"
+                  >
+                    <Eye className="h-3.5 w-3.5" />
+                    Open in Workspace
+                  </button>
+                </div>
               ))}
             </div>
           )}
@@ -497,102 +517,33 @@ const MessageItem: React.FC<{ message: Message }> = ({ message }) => {
 
         {/* Project Code Artifacts Explorer */}
         {message.artifacts && message.artifacts.length > 0 && (
-          <div className="w-full">
+          <div className="w-full space-y-2 mt-2">
             {message.artifacts.map((art, idx) => (
-              <ArtifactExplorer key={idx} artifact={art} />
+              <div
+                key={idx}
+                className="p-3 bg-slate-900 border border-slate-800 hover:border-slate-700/80 rounded-xl flex items-center justify-between gap-4 cursor-pointer hover:bg-slate-900/60 active:scale-[0.99] transition-all"
+                onClick={() => onOpenArtifact({
+                  id: art.id,
+                  type: "Project",
+                  title: `Code Project: ${art.id}`,
+                  files: art.files
+                })}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+                    <FolderOpen className="h-5 w-5 text-emerald-400" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-slate-200">Interactive Workspace Project</p>
+                    <p className="text-[10px] text-slate-500">{art.files?.length || 0} files generated</p>
+                  </div>
+                </div>
+                <span className="text-[10px] font-semibold text-emerald-400 uppercase tracking-wide">Open Project</span>
+              </div>
             ))}
           </div>
         )}
       </div>
-
-      {isUser && (
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-600/10 border border-indigo-500/25">
-          <UserIcon className="h-4.5 w-4.5 text-indigo-400" />
-        </div>
-      )}
-    </div>
-  )
-}
-
-// Interactive Component to Browse Code Project Artifacts
-const ArtifactExplorer: React.FC<{ artifact: Artifact }> = ({ artifact }) => {
-  const [isOpen, setIsOpen] = useState(true)
-  const files = artifact.files || []
-  const [selectedFileIdx, setSelectedFileIdx] = useState<number>(0)
-
-  if (files.length === 0) return null
-
-  const activeFile = files[selectedFileIdx]
-
-  return (
-    <Card className="border border-slate-800 bg-slate-950 rounded-xl overflow-hidden mt-3 max-w-full">
-      {/* Header */}
-      <div
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center justify-between px-4 py-3 bg-slate-900 border-b border-slate-800 cursor-pointer hover:bg-slate-900/80 transition-colors"
-      >
-        <div className="flex items-center gap-2">
-          <FolderOpen className="h-4 w-4 text-emerald-400" />
-          <span className="text-xs font-semibold text-emerald-400 tracking-wide">
-            Generated Code Project: {artifact.id}
-          </span>
-          <Badge variant="outline" className="text-[10px] px-2 py-0 border-emerald-500/30 text-emerald-400">
-            {files.length} {files.length === 1 ? "file" : "files"}
-          </Badge>
-        </div>
-        <button className="text-slate-400 hover:text-slate-200">
-          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-        </button>
-      </div>
-
-      {isOpen && (
-        <div className="flex flex-col md:flex-row h-96">
-          {/* File sidebar selector */}
-          <div className="w-full md:w-48 bg-slate-950/40 border-r border-slate-800 overflow-y-auto p-2 space-y-1">
-            {files.map((file, idx) => {
-              const isSelected = idx === selectedFileIdx
-              return (
-                <button
-                  key={idx}
-                  onClick={() => setSelectedFileIdx(idx)}
-                  className={`w-full text-left truncate px-2.5 py-1.5 rounded-lg text-xs font-medium cursor-pointer transition-colors block ${
-                    isSelected
-                      ? "bg-slate-900 text-slate-100 border border-slate-800"
-                      : "text-slate-400 hover:bg-slate-900/40 hover:text-slate-200 border border-transparent"
-                  }`}
-                  title={file.name}
-                >
-                  📄 {file.name.split("/").pop()}
-                </button>
-              )
-            })}
-          </div>
-
-          {/* File Code Display */}
-          <div className="flex-1 flex flex-col bg-slate-950 overflow-hidden">
-            {/* Filename and details */}
-            <div className="bg-slate-900 px-4 py-1.5 flex justify-between items-center text-[10px] text-slate-500 font-mono border-b border-slate-800/80">
-              <span>{activeFile.name}</span>
-              <button
-                onClick={() => {
-                  navigator.clipboard.writeText(activeFile.content)
-                  alert("Copied code to clipboard!")
-                }}
-                className="hover:text-slate-300 font-sans cursor-pointer text-indigo-400 transition-colors"
-              >
-                Copy Code
-              </button>
-            </div>
-            {/* Scrollable code window */}
-            <div className="flex-1 p-4 overflow-auto font-mono text-xs text-slate-300 whitespace-pre scrollbar-thin select-text">
-              <code>{activeFile.content}</code>
-            </div>
-          </div>
-        </div>
-      )}
-    </Card>
-  )
-}
 
 // Simple regex extractor for download URLs (S3 buckets / static routes)
 function extractDownloadLinks(content: string): { url: string; ext: string }[] {
