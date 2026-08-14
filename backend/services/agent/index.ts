@@ -30,7 +30,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // API routes
-app.use("/api/agent", agentRoutes);
+app.use("/", agentRoutes);
 
 // Base endpoint for health checking
 app.get("/", (req: Request, res: Response) => {
