@@ -12,6 +12,7 @@ import { signOut as firebaseSignOut } from "firebase/auth"
 import { auth } from "@/utils/firebase"
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
 import { ChatSidebar } from "@/features/chat/components/ChatSidebar"
+import { ChatArea } from "@/features/chat/components/ChatArea"
 import { getConversations, createConversation, deleteConversation, type Conversation } from "@/features/chat/api/chatApi"
 import { MessageSquare, Loader2 } from "lucide-react"
 
@@ -109,26 +110,29 @@ export const Home: React.FC = () => {
             </h2>
           </header>
           
-          {/* Center Content Sandbox */}
-          <div className="flex-1 flex items-center justify-center p-8 text-center max-w-2xl mx-auto w-full">
-            <div className="space-y-6 animate-fade-in">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-500/10 to-violet-500/10 border border-indigo-500/20 shadow-md">
-                <MessageSquare className="h-7 w-7 text-indigo-400" />
-              </div>
-              <div className="space-y-2">
-                <h3 className="text-2xl font-extrabold tracking-tight text-white">
-                  {activeChat 
-                    ? `Active Sandbox: ${activeChat.title || "New Chat"}`
-                    : "Welcome to Nexus AI Sandbox"}
-                </h3>
-                <p className="text-slate-400 text-sm leading-relaxed">
-                  {activeChat 
-                    ? "This workspace conversation session is fully established. You can list multiple user workspaces on the sidebar or build out agent message structures next."
-                    : "Select an existing conversation from the sidebar or click 'New Chat' to spawn a brand new persistent chat workspace."}
-                </p>
+          {/* Main workspace area */}
+          {activeConversationId ? (
+            <ChatArea
+              conversationId={activeConversationId}
+              conversationTitle={activeChat?.title || "New Chat"}
+            />
+          ) : (
+            <div className="flex-1 flex items-center justify-center p-8 text-center max-w-2xl mx-auto w-full">
+              <div className="space-y-6 animate-fade-in">
+                <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-tr from-indigo-500/10 to-violet-500/10 border border-indigo-500/20 shadow-md">
+                  <MessageSquare className="h-7 w-7 text-indigo-400" />
+                </div>
+                <div className="space-y-2">
+                  <h3 className="text-2xl font-extrabold tracking-tight text-white">
+                    Welcome to Nexus AI Sandbox
+                  </h3>
+                  <p className="text-slate-400 text-sm leading-relaxed">
+                    Select an existing conversation from the sidebar or click 'New Chat' to spawn a brand new persistent chat workspace.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+          )}
         </main>
       </div>
     </SidebarProvider>

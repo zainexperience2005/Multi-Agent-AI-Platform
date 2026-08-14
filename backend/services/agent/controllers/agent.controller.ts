@@ -17,7 +17,7 @@ export const agent = async (req: Request, res: Response): Promise<Response> => {
     }
 
     // Run the agent state graph
-    const result = await graph.invoke({ prompt, conversationId, agent, file });
+    const result = await graph.invoke({ prompt, conversationId, agent, file: file?.path });
     await addMessage(conversationId, "user", prompt);
     await addMessage(conversationId, "assistant", result.aiResponse);
     // Save assistant message in the database via the chat service
