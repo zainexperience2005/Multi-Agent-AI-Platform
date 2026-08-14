@@ -7,7 +7,8 @@ export const createConversation = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const userId = req.headers["x-user-id"];
+  const userIdRaw = req.headers["x-user-id"];
+  const userId = Array.isArray(userIdRaw) ? userIdRaw[0] : userIdRaw;
 
   if (typeof userId !== "string") {
     res.status(400).json({ error: "Invalid or missing User ID header" });
@@ -27,7 +28,8 @@ export const getConversations = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const userId = req.headers["x-user-id"];
+  const userIdRaw = req.headers["x-user-id"];
+  const userId = Array.isArray(userIdRaw) ? userIdRaw[0] : userIdRaw;
 
   if (typeof userId !== "string") {
     res.status(400).json({ error: "Invalid or missing User ID header" });
@@ -58,6 +60,55 @@ export const updateConversation = async (
       { new: true },
     );
     res.status(200).json(conversation);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const saveMessage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { conversationId, role, content, images, artifacts } = req.body;
+  try {
+    const message = await Message.create({
+      conversationId,
+      role,
+      content,
+      images,
+      artifacts,
+    });
+
+    // If the message is from the user, check if we need to update the conversation title
+    if (role === "user") {
+      const conversation = await Conversation.findById(conversationId);
+      if (
+        conversation &&
+        (!conversation.title || conversation.title.toLowerCase() === "new chat")
+      ) {
+        conversation.title = content;
+        await conversation.save();
+      }
+    }
+
+    res.status(201).json(message);
+  } catch (error) {
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getMessages = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const { conversationId } = req.params;
+  try {
+    const messages = await Message.find({ conversationId }).sort({
+      createdAt: 1,
+    });
+    res.status(200).json(messages);
   } catch (error) {
     res.status(500).json({ message: "Internal server error" });
   }

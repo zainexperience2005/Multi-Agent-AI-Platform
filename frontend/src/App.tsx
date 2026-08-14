@@ -13,9 +13,7 @@ export const App = () => {
 
   useEffect(() => {
     const fetchUser = async () => {
-      const user = await getCurrentUser();
-      console.log({user});
-      
+      const user = await getCurrentUser();   
       dispatch(setUserdata(user));
       setLoading(false);
     };
