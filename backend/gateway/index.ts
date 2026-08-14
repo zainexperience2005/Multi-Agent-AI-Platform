@@ -27,8 +27,8 @@ app.use(
 );
 
 // Standard parsers for JSON payloads, URL encoded payloads, and HTTP cookies
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 
 /**
@@ -46,6 +46,7 @@ app.get("/api/me", protect, getCurrentUser);
 app.use(
   "/api/auth",
   proxy(`${process.env.AUTH_PORT}`, {
+    limit: "50mb",
     proxyReqPathResolver: (req: Request) => {
       return req.url;
     },
@@ -70,19 +71,7 @@ app.use(
 app.use(
   "/api/agent",
   proxy(`${process.env.AGENT_PORT}`, {
-    proxyReqPathResolver: (req: Request) => {
-      return req.url;
-    },
-  }),
-);
-
-/**
- * Route: /api/billing
- * Description: Proxies subscription and ledger calls to the Billing Microservice.
- */
-app.use(
-  "/api/billing",
-  proxy(`${process.env.BILLING_PORT}`, {
+    limit: "50mb",
     proxyReqPathResolver: (req: Request) => {
       return req.url;
     },

@@ -6,6 +6,12 @@ export const router = async (state: typeof AgentState.State) => {
   if (state.agent && state.agent !== "auto" && state.agent !== "chat") {
     return { agent: state.agent };
   }
+  if (state.file?.mimetype === "application/pdf") {
+    return { ...state, agent: "pdfRag" };
+  }
+  if (state.file?.mimetype?.startsWith("image/")) {
+    return { ...state, agent: "imageAnalyzer" };
+  }
 
   const llm = await getModel("router");
   const messages = `You are an agent router.
@@ -21,11 +27,14 @@ export const router = async (state: typeof AgentState.State) => {
      Return only one word: the name of the agent.
      
      User Query: ${state.prompt}`;
-     
+
   const response = await llm.invoke(messages);
   console.log({ routerResponse: response });
 
-  const content = typeof response.content === "string" ? response.content.trim().toLowerCase() : "";
+  const content =
+    typeof response.content === "string"
+      ? response.content.trim().toLowerCase()
+      : "";
 
   return { agent: content || "chat" };
 };

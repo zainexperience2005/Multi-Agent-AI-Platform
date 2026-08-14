@@ -1,6 +1,10 @@
 import mongoose from "mongoose";
 import dns from "dns";
 
+/**
+ * Initializes connection to the MongoDB instance.
+ * Automatically configures fallback DNS resolution to prevent SRV lookup failures.
+ */
 const connectDB = async () => {
   if (!process.env.MONGODB_URI) {
     throw new Error("Please provide MongoDB URI");
@@ -10,6 +14,7 @@ const connectDB = async () => {
     dns.setServers(["8.8.8.8", "1.1.1.1"]);
 
     const dbName = process.env.MONGODB_DB_NAME || "auth";
+    // Establish connection utilizing standard mongoose driver
     await mongoose.connect(process.env.MONGODB_URI, { dbName });
     console.log(`MongoDB connected successfully to database: ${dbName}`);
   } catch (error) {

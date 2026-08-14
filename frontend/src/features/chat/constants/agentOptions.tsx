@@ -5,7 +5,8 @@ import {
   FileText,
   FileSpreadsheet,
   Search,
-  Eye
+  Eye,
+  Image
 } from "lucide-react"
 import { type AgentOption } from "../types"
 
@@ -51,5 +52,20 @@ export const AGENT_OPTIONS: AgentOption[] = [
     description: "Processes uploaded images to perform visual question-answering and analysis.",
     icon: <Eye className="h-4 w-4" />,
     color: "bg-purple-500/10 text-purple-400 border-purple-500/25"
+  },
+  {
+    id: "pdfRag",
+    name: "PDF RAG",
+    description: "Upload a PDF document and search or ask questions about its content.",
+    icon: <FileText className="h-4 w-4" />,
+    color: "bg-orange-500/10 text-orange-400 border-orange-500/25"
+  },
+  {
+    id: "imageAnalyzer",
+    name: "Image Analyzer",
+    description: "Analyzes uploaded images, extracts text, or displays charts and tables in tabular formats.",
+    icon: <Image className="h-4 w-4" />,
+    color: "bg-pink-500/10 text-pink-400 border-pink-500/25"
   }
 ]
+

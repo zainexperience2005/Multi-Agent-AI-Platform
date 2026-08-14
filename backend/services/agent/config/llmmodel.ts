@@ -57,6 +57,8 @@ export const getModel = async (agent: string) => {
       return getGroqModel();
     case "vision":
       return getGoogleModel();
+    case "imageAnalyzer":
+      return getGoogleModel();
     default:
       return getGroqModel();
   }

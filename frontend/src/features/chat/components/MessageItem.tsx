@@ -48,6 +48,8 @@ export const MessageItem: React.FC<MessageItemProps> = ({ message, onOpenArtifac
                   ? "bg-amber-500/10 text-amber-400 border-amber-500/30"
                   : message.agent === "vision"
                   ? "bg-purple-500/10 text-purple-400 border-purple-500/30"
+                  : message.agent === "imageAnalyzer"
+                  ? "bg-pink-500/10 text-pink-400 border-pink-500/30"
                   : "bg-blue-500/10 text-blue-400 border-blue-500/30"
               }`}
             >

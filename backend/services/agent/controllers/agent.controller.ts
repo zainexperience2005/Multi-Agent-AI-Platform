@@ -1,11 +1,21 @@
 import axios from "axios";
-import type { Request, Response } from "express";
+import type { NextFunction, Request, Response } from "express";
 import { graph } from "../graph/graph.ts";
 import { addMessage } from "../config/memory.ts";
+import { checkAgentLimit } from "../config/agentlimit.ts";
+import fs from "fs";
 
-export const agent = async (req: Request, res: Response): Promise<Response> => {
+export const agent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): Promise<Response | void> => {
   try {
     const { prompt, conversationId, agent } = req.body;
+    
+    // Check limit before running the agent graph or messaging APIs
+    await checkAgentLimit(agent);
+
     const file = req.file;
     // Save user message in the database via the chat service
     if (process.env.CHAT_SERVICE) {
@@ -13,11 +23,17 @@ export const agent = async (req: Request, res: Response): Promise<Response> => {
         conversationId,
         role: "user",
         content: prompt,
+        file,
       });
     }
 
     // Run the agent state graph
-    const result = await graph.invoke({ prompt, conversationId, agent, file: file?.path });
+    const result = await graph.invoke({
+      prompt,
+      conversationId,
+      agent,
+      file: file ? { path: file.path, mimetype: file.mimetype } : undefined,
+    });
     await addMessage(conversationId, "user", prompt);
     await addMessage(conversationId, "assistant", result.aiResponse);
     // Save assistant message in the database via the chat service
@@ -39,8 +55,13 @@ export const agent = async (req: Request, res: Response): Promise<Response> => {
       artifacts: result.artifacts,
     });
   } catch (error: any) {
-    return res
-      .status(500)
-      .json({ error: error.message || "Internal server error" });
+    if (req.file?.path && fs.existsSync(req.file.path)) {
+      try {
+        fs.unlinkSync(req.file.path);
+      } catch (unlinkErr) {
+        console.error("Failed to delete temp file on error:", unlinkErr);
+      }
+    }
+    next(error);
   }
 };

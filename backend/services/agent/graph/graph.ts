@@ -7,6 +7,7 @@ import { pdfAgent } from "../agents/pdf.agent.ts";
 import { pptAgent } from "../agents/ppt.agent.ts";
 import { visionAgent } from "../agents/vision.agent.ts";
 import { pdfRag } from "../agents/pdfRag.agent.ts";
+import { imageAnalyzer } from "../agents/imageAnyzer.agent.ts";
 import { router } from "./router.ts";
 
 export const graph = new StateGraph(AgentState)
@@ -18,6 +19,7 @@ export const graph = new StateGraph(AgentState)
   .addNode("vision", visionAgent)
   .addNode("router", router)
   .addNode("pdfRag", pdfRag)
+  .addNode("imageAnalyzer", imageAnalyzer)
   .addEdge(START, "router")
   .addConditionalEdges(
     "router",
@@ -37,6 +39,8 @@ export const graph = new StateGraph(AgentState)
           return "pdfRag";
         case "vision":
           return "vision";
+        case "imageAnalyzer":
+          return "imageAnalyzer";
         default:
           return END;
       }
@@ -49,6 +53,7 @@ export const graph = new StateGraph(AgentState)
       ppt: "ppt",
       pdfRag: "pdfRag",
       vision: "vision",
+      imageAnalyzer: "imageAnalyzer",
     },
   )
   .addEdge("search", "chat")
@@ -58,4 +63,5 @@ export const graph = new StateGraph(AgentState)
   .addEdge("ppt", END)
   .addEdge("pdfRag", END)
   .addEdge("vision", END)
+  .addEdge("imageAnalyzer", END)
   .compile();

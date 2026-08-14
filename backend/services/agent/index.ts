@@ -23,10 +23,15 @@ app.use(
     credentials: true,
   }),
 );
-
+app.use((err: any, req: any, res: any, next: any) => {
+  if (err.status) {
+    return res.status(err.status).json({ error: err.message });
+  }
+  return res.status(500).json({ error: "Internal server error" });
+});
 // Body parser and cookie parser middlewares
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 app.use(cookieParser());
 
 // API routes

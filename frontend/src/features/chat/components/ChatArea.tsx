@@ -52,8 +52,19 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
         alert("Please select a PDF document for RAG.")
         return
       }
-      if (selectedAgent === "vision" && !file.type.startsWith("image/")) {
-        alert("Please select an image file for vision analysis.")
+      if (
+        (selectedAgent === "vision" || selectedAgent === "imageAnalyzer") &&
+        !file.type.startsWith("image/")
+      ) {
+        alert("Please select an image file.")
+        return
+      }
+      if (
+        selectedAgent === "chat" &&
+        file.type !== "application/pdf" &&
+        !file.type.startsWith("image/")
+      ) {
+        alert("Please select either a PDF document or an image file.")
         return
       }
       setAttachedFile(file)
@@ -75,11 +86,16 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     setInput("")
     setLoading(true)
 
+    let finalPrompt = userPrompt
+    if (attachedFile && !attachedFile.type.startsWith("image/")) {
+      finalPrompt = `📎 Attached File: ${attachedFile.name}\n\n${userPrompt}`
+    }
+
     // Optimistically add user message in frontend UI
     const tempUserMsg: Message = {
       conversationId,
       role: "user",
-      content: userPrompt,
+      content: finalPrompt,
       images: attachedFile && attachedFile.type.startsWith("image/")
         ? [URL.createObjectURL(attachedFile)]
         : undefined
@@ -90,7 +106,7 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
     setAttachedFile(null)
 
     // Call Backend Agent Service via Gateway
-    const response = await sendAgentMessage(conversationId, userPrompt, selectedAgent, fileToUpload)
+    const response = await sendAgentMessage(conversationId, finalPrompt, selectedAgent, fileToUpload)
 
     if (response) {
       // Add agent reply to messages list
@@ -233,11 +249,11 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                 ? "What presentation outline or slides should I generate?"
                 : selectedAgent === "coding"
                 ? "Describe the code/project you want generated..."
-                : selectedAgent === "vision"
+                : (selectedAgent === "vision" || selectedAgent === "imageAnalyzer")
                 ? "Attach an image and ask a question..."
                 : selectedAgent === "pdfRag"
                 ? "Attach a PDF and ask questions about its content..."
-                : "Ask General AI agent or search for weather/live info..."
+                : "Ask General AI agent, search, or attach a PDF/Image for automated RAG/analysis routing..."
             }
             className="w-full bg-transparent text-slate-200 placeholder-slate-500 text-xs px-3 py-2 focus:outline-none resize-none min-h-[44px] max-h-[120px] scrollbar-none"
             rows={2}
@@ -254,13 +270,15 @@ export const ChatArea: React.FC<ChatAreaProps> = ({
                 accept={
                   selectedAgent === "pdfRag"
                     ? "application/pdf"
-                    : selectedAgent === "vision"
+                    : (selectedAgent === "vision" || selectedAgent === "imageAnalyzer")
                     ? "image/*"
+                    : selectedAgent === "chat"
+                    ? "application/pdf,image/*"
                     : "*/*"
                 }
               />
               {/* Only show upload icon for agents that accept file arguments */}
-              {(selectedAgent === "pdfRag" || selectedAgent === "vision" || selectedAgent === "coding") && (
+              {(selectedAgent === "pdfRag" || selectedAgent === "vision" || selectedAgent === "imageAnalyzer" || selectedAgent === "coding" || selectedAgent === "chat") && (
                 <button
                   type="button"
                   onClick={() => fileInputRef.current?.click()}

@@ -2,6 +2,14 @@ import Conversation from "../models/conversation.model.ts";
 import Message from "../models/message.model.ts";
 import type { Request, Response, NextFunction } from "express";
 
+/**
+ * Creates a new Conversation instance for the user.
+ * 
+ * @route POST /
+ * @param {Request} req - Express request, expects 'x-user-id' in headers
+ * @param {Response} res - Express response returning the created conversation
+ * @param {NextFunction} next - Express next function for error handling
+ */
 export const createConversation = async (
   req: Request,
   res: Response,
@@ -10,12 +18,14 @@ export const createConversation = async (
   const userIdRaw = req.headers["x-user-id"];
   const userId = Array.isArray(userIdRaw) ? userIdRaw[0] : userIdRaw;
 
+  // Validate the user identity is present
   if (typeof userId !== "string") {
     res.status(400).json({ error: "Invalid or missing User ID header" });
     return;
   }
 
   try {
+    // Create new Conversation mapping the conversation owner
     const conversation = await Conversation.create({ userId });
     res.status(201).json(conversation);
   } catch (error) {
@@ -23,6 +33,14 @@ export const createConversation = async (
   }
 };
 
+/**
+ * Retrieves all conversations owned by the authenticated user, sorted by creation date descending.
+ * 
+ * @route GET /
+ * @param {Request} req - Express request, expects 'x-user-id' in headers
+ * @param {Response} res - Express response returning user's conversations list
+ * @param {NextFunction} next - Express next function for error handling
+ */
 export const getConversations = async (
   req: Request,
   res: Response,
@@ -31,12 +49,14 @@ export const getConversations = async (
   const userIdRaw = req.headers["x-user-id"];
   const userId = Array.isArray(userIdRaw) ? userIdRaw[0] : userIdRaw;
 
+  // Validate the user identity is present
   if (typeof userId !== "string") {
     res.status(400).json({ error: "Invalid or missing User ID header" });
     return;
   }
 
   try {
+    // Retrieve conversations matching user ID and sort by newest first
     const conversations = await Conversation.find({ userId }).sort({
       createdAt: -1,
     });
@@ -46,6 +66,14 @@ export const getConversations = async (
   }
 };
 
+/**
+ * Updates the title of an existing conversation.
+ * 
+ * @route PUT /:conversationId
+ * @param {Request} req - Express request containing updated 'title' in body and 'conversationId' parameter
+ * @param {Response} res - Express response returning the updated conversation
+ * @param {NextFunction} next - Express next function for error handling
+ */
 export const updateConversation = async (
   req: Request,
   res: Response,
@@ -54,6 +82,7 @@ export const updateConversation = async (
   const { conversationId } = req.params;
   const { title } = req.body;
   try {
+    // Find and update the conversation by id, returning the newly modified document
     const conversation = await Conversation.findByIdAndUpdate(
       conversationId,
       { title },
@@ -65,6 +94,15 @@ export const updateConversation = async (
   }
 };
 
+/**
+ * Saves a message (user prompt or agent response) to MongoDB.
+ * If this is the user's first message, updates the conversation title to match the prompt context.
+ * 
+ * @route POST /messages
+ * @param {Request} req - Express request containing message properties in body
+ * @param {Response} res - Express response returning the saved message document
+ * @param {NextFunction} next - Express next function for error handling
+ */
 export const saveMessage = async (
   req: Request,
   res: Response,
@@ -72,6 +110,7 @@ export const saveMessage = async (
 ) => {
   const { conversationId, role, content, images, artifacts, agent } = req.body;
   try {
+    // Save the message document in the messages collection
     const message = await Message.create({
       conversationId,
       role,
@@ -81,7 +120,7 @@ export const saveMessage = async (
       agent,
     });
 
-    // If the message is from the user, check if we need to update the conversation title
+    // Automatically set conversation title on user's first interaction
     if (role === "user") {
       const conversation = await Conversation.findById(conversationId);
       if (
@@ -99,6 +138,14 @@ export const saveMessage = async (
   }
 };
 
+/**
+ * Retrieves all messages for a specific conversation ID, sorted chronologically.
+ * 
+ * @route GET /messages/:conversationId
+ * @param {Request} req - Express request containing 'conversationId' parameter
+ * @param {Response} res - Express response returning messages list
+ * @param {NextFunction} next - Express next function for error handling
+ */
 export const getMessages = async (
   req: Request,
   res: Response,
@@ -106,6 +153,7 @@ export const getMessages = async (
 ) => {
   const { conversationId } = req.params;
   try {
+    // Fetch and sort messages in ascending chronological order
     const messages = await Message.find({ conversationId }).sort({
       createdAt: 1,
     });
@@ -115,6 +163,14 @@ export const getMessages = async (
   }
 };
 
+/**
+ * Deletes a conversation and all cascading messages associated with it.
+ * 
+ * @route DELETE /:conversationId
+ * @param {Request} req - Express request containing 'conversationId' parameter
+ * @param {Response} res - Express response returning success status
+ * @param {NextFunction} next - Express next function for error handling
+ */
 export const deleteConversation = async (
   req: Request,
   res: Response,
@@ -122,7 +178,9 @@ export const deleteConversation = async (
 ) => {
   const { conversationId } = req.params;
   try {
+    // Delete the conversation document itself
     await Conversation.findByIdAndDelete(conversationId);
+    // Cascade delete all message documents matching conversationId
     await Message.deleteMany({ conversationId });
     res.status(200).json({ message: "Conversation deleted successfully" });
   } catch (error) {
