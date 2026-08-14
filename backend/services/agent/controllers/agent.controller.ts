@@ -9,7 +9,7 @@ export const agent = async (req: Request, res: Response): Promise<Response> => {
     const file = req.file;
     // Save user message in the database via the chat service
     if (process.env.CHAT_SERVICE) {
-      await axios.post(`${process.env.CHAT_SERVICE}/save-message`, {
+      await axios.post(`${process.env.CHAT_SERVICE}/messages`, {
         conversationId,
         role: "user",
         content: prompt,
@@ -22,7 +22,7 @@ export const agent = async (req: Request, res: Response): Promise<Response> => {
     await addMessage(conversationId, "assistant", result.aiResponse);
     // Save assistant message in the database via the chat service
     if (process.env.CHAT_SERVICE) {
-      await axios.post(`${process.env.CHAT_SERVICE}/save-message`, {
+      await axios.post(`${process.env.CHAT_SERVICE}/messages`, {
         conversationId,
         role: "assistant",
         content: result.aiResponse,
