@@ -18,6 +18,8 @@ import {
   FolderOpen
 } from "lucide-react"
 import { getMessages, sendAgentMessage, type Message, type Artifact, type FileArtifact } from "../api/chatApi"
+import ReactMarkdown from "react-markdown"
+import remarkGfm from "remark-gfm"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Card } from "@/components/ui/card"
@@ -412,8 +414,51 @@ const MessageItem: React.FC<{ message: Message }> = ({ message }) => {
             ? "bg-indigo-600/10 text-slate-200 border-indigo-500/20"
             : "bg-slate-900/60 text-slate-300 border-slate-800/80"
         }`}>
-          {/* Plaintext / Markdown content */}
-          <div className="whitespace-pre-wrap break-words">{message.content}</div>
+          {/* Markdown Content Renderer */}
+          <div className="prose prose-invert max-w-none text-slate-300 break-words text-sm leading-relaxed">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                ul: ({ children }) => <ul className="list-disc pl-5 mb-2 space-y-1">{children}</ul>,
+                ol: ({ children }) => <ol className="list-decimal pl-5 mb-2 space-y-1">{children}</ol>,
+                li: ({ children }) => <li className="text-slate-300">{children}</li>,
+                h1: ({ children }) => <h1 className="text-base font-bold my-3 text-slate-100">{children}</h1>,
+                h2: ({ children }) => <h2 className="text-sm font-semibold my-2 text-slate-100">{children}</h2>,
+                h3: ({ children }) => <h3 className="text-xs font-semibold my-2 text-slate-200">{children}</h3>,
+                code: ({ className, children }) => {
+                  const inline = !className;
+                  return inline ? (
+                    <code className="bg-slate-950 px-1.5 py-0.5 rounded text-indigo-400 font-mono text-xs">{children}</code>
+                  ) : (
+                    <pre className="bg-slate-950 p-3 rounded-lg border border-slate-800 my-2 overflow-x-auto text-xs font-mono text-slate-300 select-text">
+                      <code>{children}</code>
+                    </pre>
+                  );
+                },
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-3 rounded-lg border border-slate-800">
+                    <table className="min-w-full divide-y divide-slate-800 text-left text-xs">{children}</table>
+                  </div>
+                ),
+                thead: ({ children }) => <thead className="bg-slate-900 text-slate-400">{children}</thead>,
+                tbody: ({ children }) => <tbody className="divide-y divide-slate-800 bg-slate-950/20">{children}</tbody>,
+                tr: ({ children }) => <tr>{children}</tr>,
+                th: ({ children }) => <th className="px-3 py-2 font-semibold">{children}</th>,
+                td: ({ children }) => <td className="px-3 py-2 text-slate-300">{children}</td>,
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-indigo-500/50 pl-3 italic my-2 text-slate-400">{children}</blockquote>
+                ),
+                a: ({ href, children }) => (
+                  <a href={href} target="_blank" rel="noopener noreferrer" className="text-indigo-400 hover:text-indigo-300 hover:underline font-semibold">
+                    {children}
+                  </a>
+                )
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </div>
 
           {/* S3 Download Links extractor */}
           {!isUser && message.content && message.content.includes("http") && (
