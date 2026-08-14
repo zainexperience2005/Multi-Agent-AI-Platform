@@ -3,6 +3,8 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import connectDB from "./config/db.ts";
+import chatRoutes from "./routes/chat.routes.ts";
 
 // Load environment variables
 dotenv.config();
@@ -22,11 +24,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+app.use("/", chatRoutes);
+
 app.get("/", (req: Request, res: Response) => {
   res.send("Hello from Chat Service!");
 });
 
 // Start listening on port
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
+  await connectDB();
   console.log(`Chat service is running on port ${PORT}`);
 });

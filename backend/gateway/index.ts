@@ -37,11 +37,8 @@ app.use(
 
 app.use(
   "/api/chat",
-  proxy(`${process.env.CHAT_PORT}`, {
-    proxyReqPathResolver: (req: Request) => {
-      return req.url;
-    },
-  }),
+  protect,
+  proxyWithHeader(`${process.env.CHAT_PORT}`),
 );
 
 app.use(

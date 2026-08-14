@@ -1,4 +1,4 @@
-import LoginFeature from "@/features/home/Login.tsx"
+import LoginFeature from "@/features/auth/components/Login.tsx"
 
 export const Login = () => {
   return <LoginFeature />

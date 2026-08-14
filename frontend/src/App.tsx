@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react"
 import { useDispatch, useSelector } from "react-redux"
 import type { RootState } from "./redux/store";
-import { getCurrentUser } from "./features/getCurrentUser";
+import { getCurrentUser } from "./features/auth/api/getCurrentUser";
 import { setUserdata } from "./redux/userSlice";
 import { Loader2 } from "lucide-react";
 import { Login } from "./pages/Login"

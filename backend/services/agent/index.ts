@@ -3,6 +3,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import dotenv from "dotenv";
+import connectDB from "./config/db.ts";
 
 // Load environment variables
 dotenv.config();
@@ -28,5 +29,6 @@ app.get("/", (req: Request, res: Response) => {
 
 // Start listening on port
 app.listen(PORT, () => {
+  connectDB();
   console.log(`Agent service is running on port ${PORT}`);
 });
