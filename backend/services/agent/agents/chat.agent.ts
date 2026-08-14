@@ -10,12 +10,12 @@ import { AgentState } from "../graph/state.ts";
 export const chatAgent = async (state: typeof AgentState.State) => {
   const llm = await getModel("chat");
   const history = (await getMemory(state.conversationId)) || [];
-  const searxhContext = state.searchResults
+  const searchContext = state.searchResults
     ? `Web Search Results:
   ${JSON.stringify(state.searchResults)}
   `
     : "No search results available.";
-  const systemPrompt = `You are the General Chat Agent in a Multi-Agent AI Platform. ${searxhContext}
+  const systemPrompt = `You are the General Chat Agent in a Multi-Agent AI Platform. ${searchContext}
 Your goal is to provide rich, well-structured, and highly informative responses to general user conversations, educational questions, explanations, and learning queries.
 
 Guidelines:W
