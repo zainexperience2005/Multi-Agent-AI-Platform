@@ -1,23 +1,24 @@
 // Import the functions you need from the SDKs you need
 import { initializeApp } from "firebase/app"
 import { getAuth, GoogleAuthProvider } from "firebase/auth"
+
 // TODO: Add SDKs for Firebase products that you want to use
 // https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyCSID2XxQdZl8-hpXVZr3uQEz7M9e_q92o",
-  authDomain: "multi-agent-ai-platform-cd449.firebaseapp.com",
-  projectId: "multi-agent-ai-platform-cd449",
-  storageBucket: "multi-agent-ai-platform-cd449.firebasestorage.app",
-  messagingSenderId: "655515051149",
-  appId: "1:655515051149:web:f2d567fe7ec1eba3ee6ec4",
-  measurementId: "G-755DJCZ0VT",
-}
+  apiKey: "AIzaSyAzh7hGqlCBCvpdvI2ADCLFVHubWH3O_aQ",
+  authDomain: "nexus-ai-8bb57.firebaseapp.com",
+  projectId: "nexus-ai-8bb57",
+  storageBucket: "nexus-ai-8bb57.firebasestorage.app",
+  messagingSenderId: "215645500285",
+  appId: "1:215645500285:web:ef87a500d54beae0ee5214",
+  measurementId: "G-4HDD2GHEH4"
+};
 
 // Initialize Firebase
-const app = initializeApp(firebaseConfig)
+const app = initializeApp(firebaseConfig);
 
 export const auth = getAuth(app)
 export const googleProvider = new GoogleAuthProvider()

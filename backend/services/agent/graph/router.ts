@@ -14,19 +14,23 @@ export const router = async (state: typeof AgentState.State) => {
   }
 
   const llm = await getModel("router");
-  const messages = `You are an agent router.
-     Available agents: chat, search, coding, pdf, ppt, vision.
-     Rules: 
-     chat: General Conversations, explanations, learning, questions.
-     search: current events, weather, news, recent developments, live information, internet, web lookup.
-     coding: Generate code, debug code, build projects, architecture, API design.
-     pdf: Questions about generating pdfs or document context.
-     ppt: Questions about generating presentations.
-     vision: Questions about generating images or photos.
-     
-     Return only one word: the name of the agent.
-     
-     User Query: ${state.prompt}`;
+  const messages = `You are an Agent Router in a Multi-Agent AI Platform.
+Your job is to analyze the User Query and classify it into the most appropriate specialized agent.
+
+Available Agents:
+- chat: Casual conversation, greetings, general questions, explanations, math/educational concepts, learning, or Q&A.
+- search: Current events, news, weather, recent developments, real-time lookups, or information requiring live internet access.
+- coding: Code generation, writing scripts, fixing/debugging errors, reviewing code, explaining syntax, designing database/API architectures.
+- pdf: Creating, downloading, or generating a PDF report.
+- ppt: Creating, downloading, or generating slide presentations.
+- vision: Generating, editing, drawing, or painting an image or graphic.
+
+Routing Rules:
+- Return ONLY the lowercase name of the selected agent (one of: chat, search, coding, pdf, ppt, vision).
+- Do NOT include markdown blocks, quotes, punctuation, or any introductory or conversational text.
+
+User Query:
+"${state.prompt}"`;
 
   const response = await llm.invoke(messages);
   console.log({ routerResponse: response });
