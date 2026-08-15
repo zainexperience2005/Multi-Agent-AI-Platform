@@ -1,13 +1,10 @@
+import "dotenv/config";
 import express, { type Express, type Request, type Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
-import dotenv from "dotenv";
 import connectDB from "./config/db.ts";
 import authRoutes from "./routes/auth.route.ts";
-
-// Load environment variables
-dotenv.config();
 
 const PORT = process.env.PORT || 8001;
 

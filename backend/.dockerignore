@@ -2,3 +2,4 @@
 **/temp
 **/Dockerfile
 **/.env
+!gateway/.env

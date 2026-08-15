@@ -1,15 +1,12 @@
+import "dotenv/config";
 import express, { type Express, type Request, type Response } from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
-import dotenv from "dotenv";
 import proxy from "express-http-proxy";
 import proxyWithHeader from "./utils/proxy-with-header.ts";
 import protect from "./middleware/auth.middleware.ts";
 import getCurrentUser from "./controllers/user.controller.ts";
-
-// Load environment variables from .env
-dotenv.config();
 
 const PORT = process.env.PORT || 8000;
 
