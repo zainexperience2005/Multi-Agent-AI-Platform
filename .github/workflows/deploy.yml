@@ -37,35 +37,35 @@ jobs:
             ${{ steps.login-ecr.outputs.registry }}/nexus-auth:latest
             ${{ steps.login-ecr.outputs.registry }}/nexus-auth:${{ github.sha }}
 
-      # 2. Chat Service
-      - name: Build and Push Chat Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/services/chat/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/nexus-chat:latest
-            ${{ steps.login-ecr.outputs.registry }}/nexus-chat:${{ github.sha }}
+      # # 2. Chat Service
+      # - name: Build and Push Chat Service
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: ./backend
+      #     file: ./backend/services/chat/Dockerfile
+      #     push: true
+      #     tags: |
+      #       ${{ steps.login-ecr.outputs.registry }}/nexus-chat:latest
+      #       ${{ steps.login-ecr.outputs.registry }}/nexus-chat:${{ github.sha }}
 
-      # 3. Agent Service
-      - name: Build and Push Agent Service
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/services/agent/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/nexus-agent:latest
-            ${{ steps.login-ecr.outputs.registry }}/nexus-agent:${{ github.sha }}
+      # # 3. Agent Service
+      # - name: Build and Push Agent Service
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: ./backend
+      #     file: ./backend/services/agent/Dockerfile
+      #     push: true
+      #     tags: |
+      #       ${{ steps.login-ecr.outputs.registry }}/nexus-agent:latest
+      #       ${{ steps.login-ecr.outputs.registry }}/nexus-agent:${{ github.sha }}
 
-      # 4. Gateway Service
-      - name: Build and Push Gateway
-        uses: docker/build-push-action@v5
-        with:
-          context: ./backend
-          file: ./backend/gateway/Dockerfile
-          push: true
-          tags: |
-            ${{ steps.login-ecr.outputs.registry }}/nexus-gateway:latest
-            ${{ steps.login-ecr.outputs.registry }}/nexus-gateway:${{ github.sha }}
+      # # 4. Gateway Service
+      # - name: Build and Push Gateway
+      #   uses: docker/build-push-action@v5
+      #   with:
+      #     context: ./backend
+      #     file: ./backend/gateway/Dockerfile
+      #     push: true
+      #     tags: |
+      #       ${{ steps.login-ecr.outputs.registry }}/nexus-gateway:latest
+      #       ${{ steps.login-ecr.outputs.registry }}/nexus-gateway:${{ github.sha }}
